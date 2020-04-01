@@ -72,7 +72,7 @@ class Mongo():
                         break
                 
                 if(envFound != None):
-                    return {"success":True,"value":envFound["value"]}
+                    return {"success":True,"name":envName,"desc":envFound["desc"],"value":envFound["value"]}
                 else:
                     return {"success":False,"msg":"Esa variable no existe"}
             

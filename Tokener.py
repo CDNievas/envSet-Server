@@ -42,7 +42,7 @@ class Tokener():
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise TokenIncorrectoException
 
-    def __init__(self, _url=None):
+    def __init__(self):
         if Tokener.__instance != None:
             raise Exception("Singleton class")
         else:

@@ -38,32 +38,51 @@ class Mongo():
         query = {"username": username, "password":password, "envs":[]}
         return self.db.usuarios.insert_one(query)
 
-    def setEnv(self, idUsuario, name, value):
+    def setEnv(self, idUsuario, name, value, desc):
 
         query = {"_id": ObjectId(idUsuario)}
         usuario = self.db.usuarios.find_one(query)
-        print(usuario)
-
+        
         if(usuario != None):
 
-            env = {"name": name, "value": value}
+            env = {"name": name, "value": value, "desc":desc}
             usuario["envs"].append(env)
+
+            usuario["envs"] = [env for env in usuario["envs"] if env["name"] != name]
+            usuario["envs"].append(env)
+
             self.db.usuarios.replace_one(query, usuario)
 
         else:
             raise UsuarioNoExisteException
 
-    def getEnv(self, idUsuario, idEnv):
+    def getEnv(self, idUsuario, envName):
 
         query = {"_id": ObjectId(idUsuario)}
         usuario = self.db.usuarios.find_one(query)
     
         if(usuario != None):
             
-            if(idEnv != None):
-                return usuario["envs"][int(idEnv)]
+            if(envName != None):
+                
+                envFound = None
+                for env in usuario["envs"]:
+                    if(env["name"] == envName):
+                        envFound = env
+                        break
+                
+                if(envFound != None):
+                    return {"success":True,"value":envFound["value"]}
+                else:
+                    return {"success":False,"msg":"Esa variable no existe"}
+            
             else: 
-                return {"envs":usuario["envs"]}
+
+                envs = []
+                for env in usuario["envs"]:
+                    envs.append({"name":env["name"],"desc":env["desc"]})
+                return {"success":True,"envs":envs}
+
         else:
             raise UsuarioNoExisteException
 

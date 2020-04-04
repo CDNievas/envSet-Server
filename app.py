@@ -14,6 +14,9 @@ MONGODB = os.environ.get("ENVSETDB")
 
 app = Flask(__name__)
 
+print(PORT)
+print(MONGODB)
+
 mongo = Mongo(MONGODB)
 app.secret_key = os.urandom(12)
 app.register_blueprint(webBP)

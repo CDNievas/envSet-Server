@@ -14,14 +14,13 @@ MONGODB = os.environ.get("ENVSETDB")
 
 app = Flask(__name__)
 
-print(PORT)
-print(MONGODB)
+app.url_map.strict_slashes=False
 
 mongo = Mongo(MONGODB)
 app.secret_key = os.urandom(12)
 app.register_blueprint(webBP)
-app.register_blueprint(apiPingBP, url_prefix="/api/ping")
-app.register_blueprint(apiAuthBP, url_prefix="/api/auth")
-app.register_blueprint(apiEnvBP, url_prefix="/api/envs")
+app.register_blueprint(apiPingBP, url_prefix="/api/ping/")
+app.register_blueprint(apiAuthBP, url_prefix="/api/auth/")
+app.register_blueprint(apiEnvBP, url_prefix="/api/envs/")
 app.run("0.0.0.0",PORT,debug=False)
 

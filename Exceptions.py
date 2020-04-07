@@ -7,3 +7,6 @@ class UsuarioYaExisteException(Exception):
 
 class TokenIncorrectoException(Exception):
     pass
+
+class VariableNoExisteException(Exception):
+    pass

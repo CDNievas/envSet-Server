@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-from Exceptions import UsuarioNoExisteException, UsuarioYaExisteException
+from Exceptions import VariableNoExisteException, UsuarioNoExisteException, UsuarioYaExisteException
 
 class Mongo():
 
@@ -56,6 +56,18 @@ class Mongo():
         else:
             raise UsuarioNoExisteException
 
+    def delEnv(self,idUsuario,envName):
+        
+        query = {"_id":ObjectId(idUsuario),"envs.name":envName}
+        envVar = self.db.usuarios.find_one(query)
+
+        if(envVar != None):
+            update = {"$pull":{"envs":{"name":envName}}}
+            self.db.usuarios.update_one(query,update,True)
+
+        else:
+            raise VariableNoExisteException
+
     def getEnv(self, idUsuario, envName):
 
         query = {"_id": ObjectId(idUsuario)}
@@ -64,15 +76,16 @@ class Mongo():
         if(usuario != None):
             
             if(envName != None):
-                
+                envName = envName.upper()
                 envFound = None
                 for env in usuario["envs"]:
-                    if(env["name"] == envName):
+                    if(env["name"].upper() == envName):
                         envFound = env
                         break
                 
                 if(envFound != None):
-                    return {"success":True,"name":envName,"desc":envFound["desc"],"value":envFound["value"]}
+                    envValue = envFound["value"].replace("\\\"","\"").replace("\\\'","\'")
+                    return {"success":True,"name":envName,"desc":envFound["desc"],"value":envValue}
                 else:
                     return {"success":False,"msg":"Esa variable no existe"}
             

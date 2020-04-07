@@ -4,12 +4,12 @@ from flask import Blueprint, request, jsonify
 from Tokener import Tokener
 from Mongo import Mongo
 
-from Exceptions import TokenIncorrectoException, UsuarioNoExisteException
+from Exceptions import VariableNoExisteException, TokenIncorrectoException, UsuarioNoExisteException
 
 apiEnvBP = Blueprint("apiEnvBP", __name__)
 
-@apiEnvBP.route("/", defaults={'envName': None})
-@apiEnvBP.route("/<envName>")
+@apiEnvBP.route("/", defaults={'envName': None}, methods=["GET"])
+@apiEnvBP.route("/<envName>", methods=["GET"])
 def getEnv(envName):
 
     try:
@@ -27,6 +27,26 @@ def getEnv(envName):
 
     return jsonify(data), statusCode
 
+@apiEnvBP.route("/<envName>",methods=["DELETE"])
+def delEnv(envName):
+
+    try:
+        idUsuario = getUser(request)
+        Mongo.getInstance().delEnv(idUsuario,envName)
+        data = {"success":True, "msg":"Variable borrada"}
+        statusCode = 200
+
+    except VariableNoExisteException:
+        data = {"success":False, "msg":"Variable no existe"}
+        statusCode = 410       
+
+    except TokenIncorrectoException:
+        data = {"success":False,"msg":"Token auth incorrecto. Intenta iniciando sesion nuevamente"}
+        statusCode = 401
+
+    return jsonify(data), statusCode
+
+
 @apiEnvBP.route("/", methods=["POST"])
 def setEnv():
 
@@ -34,10 +54,9 @@ def setEnv():
         
         idUsuario = getUser(request)
 
-        name = request.values["name"]
-        value = request.values["value"]
+        name = request.values["name"].upper()
         desc = request.values["desc"]
-
+        value = request.values["value"].replace("\"","\\\"").replace("\'","\\\'")
         Mongo.getInstance().setEnv(idUsuario, name, value, desc)
 
         data = {"success":True,"msg":"Variable guardada correctamente"}
